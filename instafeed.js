@@ -64,7 +64,7 @@
     };
 
     Instafeed.prototype.parse = function(response) {
-      var anchor, childNodeCount, childNodeIndex, childNodesArr, e, eMsg, fragment, header, htmlString, httpProtocol, i, image, imageObj, imageString, imageUrl, images, img, imgHeight, imgOrient, imgUrl, imgWidth, instanceName, j, k, len, len1, len2, node, parsedLimit, reverse, sortSettings, targetEl, tmpEl;
+      var anchor, childNodeCount, childNodeIndex, childNodesArr, e, eMsg, fragment, header, htmlString, httpProtocol, i, image, imageObj, imageString, imageUrl, images, img, imgHeight, imgOrient, imgUrl, imgWidth, instanceName, j, k, len, len1, len2, node, parsedLimit, reverse, sortSettings, targetEl, tmpEl, videoString, videoUrl;
       if (typeof response !== 'object') {
         if ((this.options.error != null) && typeof this.options.error === 'function') {
           this.options.error.call(this, 'Invalid JSON data');
@@ -132,14 +132,21 @@
         if ((this.options.filter != null) && typeof this.options.filter === 'function') {
           images = this._filter(images, this.options.filter);
         }
-        if ((this.options.template != null) && typeof this.options.template === 'string') {
+        if (((this.options.template != null) || ((this.options.videoTemplate != null) || (this.options.imageTemplate != null))) && typeof this.options.template === 'string') {
           htmlString = '';
           imageString = '';
+          videoString = '';
           imgUrl = '';
+          videoUrl = '';
           tmpEl = document.createElement('div');
           for (i = 0, len = images.length; i < len; i++) {
             image = images[i];
             imageObj = image.images[this.options.resolution];
+            if (image.type === 'image') {
+              imageObj = image.images[this.options.resolution];
+            } else if (image.type === 'video') {
+              imageObj = image.videos[this.options.resolution];
+            }
             if (typeof imageObj !== 'object') {
               eMsg = "No image found for resolution: " + this.options.resolution + ".";
               throw new Error(eMsg);
@@ -158,20 +165,52 @@
             if (httpProtocol && !this.options.useHttp) {
               imageUrl = imageUrl.replace(/https?:\/\//, '//');
             }
-            imageString = this._makeTemplate(this.options.template, {
-              model: image,
-              id: image.id,
-              link: image.link,
-              type: image.type,
-              image: imageUrl,
-              width: imgWidth,
-              height: imgHeight,
-              orientation: imgOrient,
-              caption: this._getObjectProperty(image, 'caption.text'),
-              likes: image.likes.count,
-              comments: image.comments.count,
-              location: this._getObjectProperty(image, 'location.name')
-            });
+            if (image.type === 'image') {
+              imageString = this._makeTemplate(this.options.template, {
+                model: image,
+                id: image.id,
+                link: image.link,
+                type: image.type,
+                image: imageUrl,
+                width: imgWidth,
+                height: imgHeight,
+                orientation: imgOrient,
+                caption: this._getObjectProperty(image, 'caption.text'),
+                likes: image.likes.count,
+                comments: image.comments.count,
+                location: this._getObjectProperty(image, 'location.name')
+              });
+            } else if (image.type === 'video') {
+              imageString = this._makeTemplate(this.options.videoTemplate, {
+                model: image,
+                id: image.id,
+                link: image.link,
+                type: image.type,
+                video: imageUrl,
+                width: imgWidth,
+                height: imgHeight,
+                orientation: imgOrient,
+                caption: this._getObjectProperty(image, 'caption.text'),
+                likes: image.likes.count,
+                comments: image.comments.count,
+                location: this._getObjectProperty(image, 'location.name')
+              });
+            } else {
+              imageString = this._makeTemplate(this.options.template, {
+                model: image,
+                id: image.id,
+                link: image.link,
+                type: image.type,
+                image: imageUrl,
+                width: imgWidth,
+                height: imgHeight,
+                orientation: imgOrient,
+                caption: this._getObjectProperty(image, 'caption.text'),
+                likes: image.likes.count,
+                comments: image.comments.count,
+                location: this._getObjectProperty(image, 'location.name')
+              });
+            }
             htmlString += imageString;
           }
           tmpEl.innerHTML = htmlString;

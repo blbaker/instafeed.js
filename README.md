@@ -73,6 +73,7 @@ If you need help with that step, just try Googling ["How to get an Instagram cli
 - `accessToken` - A valid oAuth token. Can be used in place of `clientId`.
 - `target` - Either the ID name or the DOM element itself where you want to add the images to.
 - `template` - Custom HTML template to use for images. See [templating](#templating).
+- `videoTemplate` - Custom HTML template to use for videos. See [templating](#templating).
 - `get` - Customize what Instafeed fetches. Available options are:
     - `popular` (default) - Images from the popular page
     - `tagged` - Images with a specific tag. Use `tagName` to specify the tag.
@@ -127,7 +128,7 @@ To see a full list of properties that `image` has, see [issue #21](https://githu
 
 ## Templating
 
-The easiest way to control the way Instafeed.js looks on your website is to use the __template__ option. You can write your own HTML markup and it will be used for every image that Instafeed.js fetches.
+The easiest way to control the way Instafeed.js looks on your website is to use the __template__ option. You can write your own HTML markup and it will be used for every image and video that Instafeed.js fetches.
 
 Here's a quick example:
 
@@ -138,6 +139,7 @@ Here's a quick example:
         tagName: 'awesome',
         clientId: 'YOUR_CLIENT_ID',
         template: '<a class="animation" href="{{link}}"><img src="{{image}}" /></a>'
+        vidoeTemplate: '<a class="video" href="{{video}}"><video src="{{video}}" width="100%" autoplay loop muted ></video></a>'
     });
     feed.run();
 </script>
@@ -152,6 +154,7 @@ Notice the `{{link}}` and `{{image}}`? The templating option provides several ta
 - `{{orientation}}` - contains the image's orientation. Can be `square`, `portrait`, or `landscape`.
 - `{{link}}` - URL to view the image on Instagram's website.
 - `{{image}}` - URL of the image source. The size is inherited from the `resolution` option.
+- `{{video}}` - URL of the video source. The size is inherited from the `resolution` option.
 - `{{id}}` - Unique ID of the image. Useful if you want to use [iPhone hooks](http://instagram.com/developer/iphone-hooks/) to open the images directly in the Instagram app.
 - `{{caption}}` - Image's caption text. Defaults to empty string if there isn't one.
 - `{{likes}}` - Number of likes the image has.

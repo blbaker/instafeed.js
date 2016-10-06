@@ -161,11 +161,15 @@ class Instafeed
         images = @_filter(images, @options.filter)
 
       # determine whether to parse a template, or use html fragments
-      if @options.template? and typeof @options.template is 'string'
+      if (@options.template? or
+      (@options.videoTemplate? || @options.imageTemplate?)) and
+      typeof @options.template is 'string'
         # create an html string
         htmlString = ''
         imageString = ''
+        videoString = ''
         imgUrl = ''
+        videoUrl = ''
 
         # create a temp dom node that will hold the html
         tmpEl = document.createElement('div')
@@ -173,6 +177,12 @@ class Instafeed
         # loop through the images
         for image in images
           imageObj = image.images[@options.resolution]
+
+          if image.type is 'image'
+            imageObj = image.images[@options.resolution]
+          else if image.type is 'video'
+            imageObj = image.videos[@options.resolution]
+
           if typeof imageObj isnt 'object'
             eMsg = "No image found for resolution: #{@options.resolution}."
             throw new Error eMsg
@@ -193,19 +203,48 @@ class Instafeed
             imageUrl = imageUrl.replace(/https?:\/\//, '//')
 
           # parse the template
-          imageString = @_makeTemplate @options.template,
-            model: image
-            id: image.id
-            link: image.link
-            type: image.type
-            image: imageUrl
-            width: imgWidth
-            height: imgHeight
-            orientation: imgOrient
-            caption: @_getObjectProperty(image, 'caption.text')
-            likes: image.likes.count
-            comments: image.comments.count
-            location: @_getObjectProperty(image, 'location.name')
+          if image.type is 'image'
+            imageString = @_makeTemplate @options.template,
+              model: image
+              id: image.id
+              link: image.link
+              type: image.type
+              image: imageUrl
+              width: imgWidth
+              height: imgHeight
+              orientation: imgOrient
+              caption: @_getObjectProperty(image, 'caption.text')
+              likes: image.likes.count
+              comments: image.comments.count
+              location: @_getObjectProperty(image, 'location.name')
+          else if image.type is 'video'
+            imageString = @_makeTemplate @options.videoTemplate,
+              model: image
+              id: image.id
+              link: image.link
+              type: image.type
+              video: imageUrl
+              width: imgWidth
+              height: imgHeight
+              orientation: imgOrient
+              caption: @_getObjectProperty(image, 'caption.text')
+              likes: image.likes.count
+              comments: image.comments.count
+              location: @_getObjectProperty(image, 'location.name')
+          else
+            imageString = @_makeTemplate @options.template,
+              model: image
+              id: image.id
+              link: image.link
+              type: image.type
+              image: imageUrl
+              width: imgWidth
+              height: imgHeight
+              orientation: imgOrient
+              caption: @_getObjectProperty(image, 'caption.text')
+              likes: image.likes.count
+              comments: image.comments.count
+              location: @_getObjectProperty(image, 'location.name')
 
           # add the image partial to the html string
           htmlString += imageString
